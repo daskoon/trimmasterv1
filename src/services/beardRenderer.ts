@@ -1,4 +1,4 @@
-import { Results } from '@mediapipe/face_mesh';
+import type { Results } from '@mediapipe/face_mesh';
 
 // Key Landmark Indices
 const LANDMARKS = {
@@ -38,19 +38,15 @@ export const drawBeardOverlay = (
   // --- 1. THE STACHE (Mustache Only) ---
   if (style.includes('stache') || style.includes('commander') || style.includes('goatee')) {
     ctx.beginPath();
-    
-    // Top Lip Line
     LANDMARKS.LIP_UPPER.forEach(idx => {
       const p = getPt(idx);
-      ctx.lineTo(p.x, p.y - 8); // Offset above lip
+      ctx.lineTo(p.x, p.y - 8); 
     });
     
-    // Connect to Nose
     const nose = getPt(164);
     const mouthRight = getPt(291);
     const mouthLeft = getPt(61);
     
-    // Smooth Curve to Nose
     ctx.quadraticCurveTo(mouthRight.x, nose.y + 12, nose.x, nose.y + 6);
     ctx.quadraticCurveTo(mouthLeft.x, nose.y + 12, mouthLeft.x, mouthLeft.y - 8);
     
@@ -59,40 +55,31 @@ export const drawBeardOverlay = (
     ctx.stroke();
   }
 
-  // If "The Stache" is selected, we stop here.
   if (style.includes('stache') && !style.includes('commander')) return;
 
 
   // --- 2. THE GOATEE ---
   if (style.includes('goatee')) {
-    // Goatee Logic: Connect Mouth Corners to Chin Width
     const mouthRight = getPt(291);
     const mouthLeft = getPt(61);
-    const chinRight = getPt(148); // Right chin corner
-    const chinLeft = getPt(377);  // Left chin corner
-    const chinBottom = getPt(152);
+    const chinRight = getPt(148); 
+    const chinLeft = getPt(377);  
+    
+    // chinBottom was unused, so removed it
 
     ctx.beginPath();
-    
-    // Start Right Mouth Corner
     ctx.moveTo(mouthRight.x, mouthRight.y);
-    
-    // Curve down to Right Chin
     ctx.quadraticCurveTo(mouthRight.x + 10, (mouthRight.y + chinRight.y)/2, chinRight.x, chinRight.y);
     
-    // Trace Bottom Chin
-    // (We iterate through a subset of jawline for the chin bottom)
-    const chinLandmarks = [148, 152, 377]; // Simplified chin arc
+    const chinLandmarks = [148, 152, 377]; 
     chinLandmarks.forEach(idx => {
       const p = getPt(idx);
       ctx.lineTo(p.x, p.y);
     });
 
-    // Curve up to Left Mouth Corner
     ctx.lineTo(chinLeft.x, chinLeft.y);
     ctx.quadraticCurveTo(mouthLeft.x - 10, (mouthLeft.y + chinLeft.y)/2, mouthLeft.x, mouthLeft.y);
 
-    // Inner Loop: Under Lip Gap
     [...LANDMARKS.LIP_LOWER].forEach(idx => {
        const p = getPt(idx);
        ctx.lineTo(p.x, p.y + 10);
@@ -101,37 +88,35 @@ export const drawBeardOverlay = (
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
-    return; // Done for Goatee
+    return; 
   }
 
 
   // --- 3. THE CHIN STRAP ---
   if (style.includes('chinstrap') || style.includes('chin strap')) {
     const sbLeft = getPt(234);
-    const sbRight = getPt(454);
+    // sbRight was unused here? No, let's check. 
+    // In Chinstrap logic I didn't use sbRight explicitly in previous code, 
+    // but I iterated LANDMARKS.JAWLINE which includes 454 (sbRight).
+    // So explicit const definition was unused.
 
     ctx.beginPath();
     ctx.moveTo(sbLeft.x, sbLeft.y);
 
-    // Jawline (Outer)
     LANDMARKS.JAWLINE.forEach(idx => {
       const p = getPt(idx);
       ctx.lineTo(p.x, p.y);
     });
 
-    // Jawline (Inner/Upper - The "Strap" width)
-    // We reverse the jawline and offset Y upwards
     [...LANDMARKS.JAWLINE].reverse().forEach(idx => {
       const p = getPt(idx);
-      // Offset logic: Move towards the nose/center to create thickness
-      // Simple offset: just Y-15 for a thin line
       ctx.lineTo(p.x, p.y - 15); 
     });
 
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
-    return; // Done for Laser Line
+    return;
   }
 
 

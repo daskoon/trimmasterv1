@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { setupFaceMesh } from '../services/faceMesh';
 import { drawBeardOverlay } from '../services/beardRenderer';
-import { Results } from '@mediapipe/face_mesh';
+import type { Results } from '@mediapipe/face_mesh';
 
 interface CameraViewProps {
   mode: 'capture' | 'guide';
