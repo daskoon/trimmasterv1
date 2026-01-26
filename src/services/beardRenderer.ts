@@ -64,8 +64,6 @@ export const drawBeardOverlay = (
   if (isLogan) {
     const sbLeft = getPt(234);
     const sbRight = getPt(454);
-    const chinLeft = getPt(377);
-    const chinRight = getPt(148);
     const cheekOffset = 25 * faceScale;
 
     // Right Sideburn / Mutton Chop
