@@ -52,17 +52,11 @@ export const CameraView: React.FC<CameraViewProps> = ({
             const width = canvasRef.current.width;
             const height = canvasRef.current.height;
 
-            // DRAWING LOOP
             ctx.save();
             ctx.clearRect(0, 0, width, height);
-
-            // We draw the raw video frame (CSS handles the mirroring for the whole view)
             ctx.drawImage(results.image, 0, 0, width, height);
-
-            // Draw Beard Overlay
             ctx.globalAlpha = opacity;
             drawBeardOverlay(ctx, results, styleName || 'commander');
-            
             ctx.restore();
           },
           idealWidth,
@@ -84,15 +78,20 @@ export const CameraView: React.FC<CameraViewProps> = ({
     return () => {
       if (cameraController) cameraController.stop();
     };
-  }, [styleName, opacity]); // Removed mirrored from dependencies to avoid camera restart
+  }, [styleName, opacity]); 
 
   return (
-    <div className="relative w-full h-full bg-black overflow-hidden">
+    <div className="absolute inset-0 w-full h-full bg-black overflow-hidden">
       <video ref={videoRef} className="hidden" playsInline muted />
 
-      {/* Visual Container: CSS Mirrored for "Mirror View", Normal for "True View" */}
+      {/* 
+          TRANSFORM CONTAINER 
+          We use 'origin-center' and 'w-screen' to ensure it doesn't collapse 
+      */}
       <div 
-        className={`absolute inset-0 w-full h-full transition-transform duration-500 ease-in-out ${mirrored ? 'scale-x-[-1]' : 'scale-x-1'}`}
+        className={`absolute inset-0 w-full h-full origin-center transition-transform duration-500 ease-in-out ${
+          mirrored ? 'scale-x-[-1]' : 'scale-x-1'
+        }`}
       >
         <canvas 
           ref={canvasRef}
@@ -100,20 +99,22 @@ export const CameraView: React.FC<CameraViewProps> = ({
         />
       </div>
 
-      {/* Overlays (Loading/Error) - Not mirrored so text stays readable */}
-      {isLoading && !error && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-50">
-          <Loader2 className="w-12 h-12 text-amber-500 animate-spin mb-4" />
-          <p className="text-white font-bold tracking-widest uppercase">Calibrating Guide...</p>
-        </div>
-      )}
+      {/* Loading/Error UI (Fixed to top layer, not flipped) */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50">
+        {isLoading && !error && (
+          <div className="flex flex-col items-center justify-center bg-black/60 backdrop-blur-md p-8 rounded-3xl">
+            <Loader2 className="w-12 h-12 text-amber-500 animate-spin mb-4" />
+            <p className="text-white font-bold tracking-widest uppercase">Calibrating Guide...</p>
+          </div>
+        )}
 
-      {error && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-zinc-900 z-50 text-white">
-          <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
-          <p className="text-lg font-medium">{error}</p>
-        </div>
-      )}
+        {error && (
+          <div className="p-8 text-center bg-zinc-900 rounded-3xl text-white border border-red-500/20 max-w-xs pointer-events-auto">
+            <AlertCircle className="w-12 h-12 text-red-500 mb-4 mx-auto" />
+            <p className="text-lg font-medium">{error}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
