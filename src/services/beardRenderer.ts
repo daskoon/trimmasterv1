@@ -94,7 +94,6 @@ export const drawBeardOverlay = (
 
     // --- BUCCANEER BRAIDS ---
     if (style.includes('buccaneer')) {
-      const chinMid = getPt(152);
       ctx.setLineDash([]);
       ctx.lineWidth = 2;
       
