@@ -25,23 +25,22 @@ export const drawBeardOverlay = (
     y: (landmarks[index]?.y || 0) * height
   });
 
-  // Calculate face scale (distance between eyes) for dynamic offsets
   const eyeL = getPt(LANDMARKS.EYE_LEFT);
   const eyeR = getPt(LANDMARKS.EYE_RIGHT);
   const faceScale = Math.sqrt(Math.pow(eyeR.x - eyeL.x, 2) + Math.pow(eyeR.y - eyeL.y, 2)) / 100;
 
   const style = (styleName || 'commander').toLowerCase().replace(/ /g, '');
-  const guideColor = '#f59e0b'; 
+  const guideColor = style.includes('buccaneer') ? '#ef4444' : '#f59e0b'; // Red for pirate!
   const fillStyle = 'rgba(10, 10, 10, 0.4)'; 
   
-  ctx.save(); // Isolate styles
+  ctx.save();
   ctx.fillStyle = fillStyle;
   ctx.strokeStyle = guideColor;
   ctx.lineWidth = 3;
   ctx.setLineDash([5, 5]);
 
-  // --- 1. THE STACHE / MUSTACHE COMPONENT ---
-  if (style.includes('stache') || style.includes('commander') || style.includes('goatee')) {
+  // --- 1. THE STACHE / PIRATE MUSTACHE ---
+  if (style.includes('stache') || style.includes('commander') || style.includes('goatee') || style.includes('buccaneer')) {
     ctx.beginPath();
     LANDMARKS.LIP_UPPER.forEach(idx => {
       const p = getPt(idx);
@@ -50,20 +49,23 @@ export const drawBeardOverlay = (
     const nose = getPt(164);
     const mouthRight = getPt(291);
     const mouthLeft = getPt(61);
-    ctx.quadraticCurveTo(mouthRight.x, nose.y + (6 * faceScale), nose.x, nose.y + (3 * faceScale));
-    ctx.quadraticCurveTo(mouthLeft.x, nose.y + (6 * faceScale), mouthLeft.x, mouthLeft.y - (4 * faceScale));
+    
+    // Pirate stache is longer and droops more
+    const drop = style.includes('buccaneer') ? 15 : 6;
+    ctx.quadraticCurveTo(mouthRight.x + (style.includes('buccaneer') ? 10 : 0), nose.y + (drop * faceScale), nose.x, nose.y + (3 * faceScale));
+    ctx.quadraticCurveTo(mouthLeft.x - (style.includes('buccaneer') ? 10 : 0), nose.y + (drop * faceScale), mouthLeft.x, mouthLeft.y - (4 * faceScale));
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
   }
 
-  if (style.includes('stache') && !style.includes('commander')) {
+  if (style.includes('stache') && !style.includes('commander') && !style.includes('buccaneer')) {
     ctx.restore();
     return;
   }
 
-  // --- 2. THE GOATEE ---
-  if (style.includes('goatee')) {
+  // --- 2. THE GOATEE / BUCCANEER CHIN ---
+  if (style.includes('goatee') || style.includes('buccaneer')) {
     const mouthRight = getPt(291);
     const mouthLeft = getPt(61);
     const chinRight = getPt(148); 
@@ -73,7 +75,6 @@ export const drawBeardOverlay = (
     ctx.moveTo(mouthRight.x, mouthRight.y);
     ctx.quadraticCurveTo(mouthRight.x + (5 * faceScale), (mouthRight.y + chinRight.y)/2, chinRight.x, chinRight.y);
     
-    // Wider, smoother chin arc
     [148, 176, 149, 150, 152, 379, 378, 400, 377].forEach(idx => {
       const p = getPt(idx);
       ctx.lineTo(p.x, p.y);
@@ -90,8 +91,30 @@ export const drawBeardOverlay = (
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
-    ctx.restore();
-    return; 
+
+    // --- BUCCANEER BRAIDS ---
+    if (style.includes('buccaneer')) {
+      const chinMid = getPt(152);
+      ctx.setLineDash([]);
+      ctx.lineWidth = 2;
+      
+      // Left Braid Guide
+      ctx.beginPath();
+      ctx.moveTo(chinLeft.x, chinLeft.y);
+      ctx.lineTo(chinLeft.x - 5, chinLeft.y + (40 * faceScale));
+      ctx.stroke();
+      
+      // Right Braid Guide
+      ctx.beginPath();
+      ctx.moveTo(chinRight.x, chinRight.y);
+      ctx.lineTo(chinRight.x + 5, chinRight.y + (40 * faceScale));
+      ctx.stroke();
+    }
+
+    if (!style.includes('commander')) {
+      ctx.restore();
+      return;
+    }
   }
 
   // --- 3. THE CHIN STRAP ---
@@ -99,20 +122,15 @@ export const drawBeardOverlay = (
     const sbLeft = getPt(234);
     ctx.beginPath();
     ctx.moveTo(sbLeft.x, sbLeft.y);
-    
-    // Outer Jawline
     LANDMARKS.JAWLINE.forEach(idx => {
       const p = getPt(idx);
       ctx.lineTo(p.x, p.y);
     });
-
-    // Inner Jawline (Dynamic offset based on face size)
     const strapWidth = 8 * faceScale;
     [...LANDMARKS.JAWLINE].reverse().forEach(idx => {
       const p = getPt(idx);
       ctx.lineTo(p.x, p.y - strapWidth); 
     });
-
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
@@ -126,7 +144,6 @@ export const drawBeardOverlay = (
     const sbRight = getPt(454);
     const mouthLeft = getPt(61);
     const sbLeft = getPt(234);
-    
     const cheekOffset = 15 * faceScale;
     const cheekRightMid = { 
       x: (mouthRight.x + sbRight.x) / 2, 
@@ -136,7 +153,6 @@ export const drawBeardOverlay = (
       x: (mouthLeft.x + sbLeft.x) / 2, 
       y: (mouthLeft.y + sbLeft.y) / 2 - cheekOffset
     };
-
     ctx.beginPath();
     ctx.moveTo(sbLeft.x, sbLeft.y);
     LANDMARKS.JAWLINE.forEach(idx => {
@@ -155,5 +171,5 @@ export const drawBeardOverlay = (
     ctx.stroke();
   }
 
-  ctx.restore(); // Clean up context state
+  ctx.restore();
 };
