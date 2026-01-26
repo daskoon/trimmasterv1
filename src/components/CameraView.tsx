@@ -52,19 +52,17 @@ export const CameraView: React.FC<CameraViewProps> = ({
             const width = canvasRef.current.width;
             const height = canvasRef.current.height;
 
+            // DRAWING LOOP
             ctx.save();
             ctx.clearRect(0, 0, width, height);
 
-            if (mirrored) {
-              ctx.translate(width, 0);
-              ctx.scale(-1, 1);
-            }
+            // We draw the raw video frame (CSS handles the mirroring for the whole view)
             ctx.drawImage(results.image, 0, 0, width, height);
 
+            // Draw Beard Overlay
             ctx.globalAlpha = opacity;
             drawBeardOverlay(ctx, results, styleName || 'commander');
-            ctx.globalAlpha = 1.0;
-
+            
             ctx.restore();
           },
           idealWidth,
@@ -86,17 +84,23 @@ export const CameraView: React.FC<CameraViewProps> = ({
     return () => {
       if (cameraController) cameraController.stop();
     };
-  }, [styleName, opacity, mirrored]); 
+  }, [styleName, opacity]); // Removed mirrored from dependencies to avoid camera restart
 
   return (
     <div className="relative w-full h-full bg-black overflow-hidden">
       <video ref={videoRef} className="hidden" playsInline muted />
 
-      <canvas 
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full object-cover"
-      />
+      {/* Visual Container: CSS Mirrored for "Mirror View", Normal for "True View" */}
+      <div 
+        className={`absolute inset-0 w-full h-full transition-transform duration-500 ease-in-out ${mirrored ? 'scale-x-[-1]' : 'scale-x-1'}`}
+      >
+        <canvas 
+          ref={canvasRef}
+          className="w-full h-full object-cover"
+        />
+      </div>
 
+      {/* Overlays (Loading/Error) - Not mirrored so text stays readable */}
       {isLoading && !error && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-50">
           <Loader2 className="w-12 h-12 text-amber-500 animate-spin mb-4" />
@@ -105,9 +109,9 @@ export const CameraView: React.FC<CameraViewProps> = ({
       )}
 
       {error && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-zinc-900 z-50">
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-zinc-900 z-50 text-white">
           <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
-          <p className="text-white text-lg font-medium">{error}</p>
+          <p className="text-lg font-medium">{error}</p>
         </div>
       )}
     </div>
