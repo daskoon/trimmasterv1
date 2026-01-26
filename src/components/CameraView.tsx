@@ -81,17 +81,22 @@ export const CameraView: React.FC<CameraViewProps> = ({
   }, [styleName, opacity]); 
 
   return (
-    <div className="absolute inset-0 w-full h-full bg-black overflow-hidden">
+    <div className="absolute inset-0 w-full h-full bg-black overflow-hidden flex items-center justify-center">
       <video ref={videoRef} className="hidden" playsInline muted />
 
       {/* 
-          TRANSFORM CONTAINER 
-          We use 'origin-center' and 'w-screen' to ensure it doesn't collapse 
+          FINAL SQUISH FIX:
+          We use scale(-1, 1) and lock the width/height to 100vw/100vh 
+          to ensure it never collapses into a vertical line.
       */}
       <div 
-        className={`absolute inset-0 w-full h-full origin-center transition-transform duration-500 ease-in-out ${
-          mirrored ? 'scale-x-[-1]' : 'scale-x-1'
-        }`}
+        style={{ 
+          width: '100vw', 
+          height: '100vh',
+          transform: mirrored ? 'scale(-1, 1)' : 'scale(1, 1)',
+          transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
+        }}
+        className="absolute inset-0 flex items-center justify-center"
       >
         <canvas 
           ref={canvasRef}
@@ -99,19 +104,12 @@ export const CameraView: React.FC<CameraViewProps> = ({
         />
       </div>
 
-      {/* Loading/Error UI (Fixed to top layer, not flipped) */}
+      {/* OVERLAYS */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50">
         {isLoading && !error && (
           <div className="flex flex-col items-center justify-center bg-black/60 backdrop-blur-md p-8 rounded-3xl">
             <Loader2 className="w-12 h-12 text-amber-500 animate-spin mb-4" />
-            <p className="text-white font-bold tracking-widest uppercase">Calibrating Guide...</p>
-          </div>
-        )}
-
-        {error && (
-          <div className="p-8 text-center bg-zinc-900 rounded-3xl text-white border border-red-500/20 max-w-xs pointer-events-auto">
-            <AlertCircle className="w-12 h-12 text-red-500 mb-4 mx-auto" />
-            <p className="text-lg font-medium">{error}</p>
+            <p className="text-white font-bold tracking-widest uppercase text-sm">Calibrating...</p>
           </div>
         )}
       </div>

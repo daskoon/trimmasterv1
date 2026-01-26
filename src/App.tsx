@@ -26,8 +26,11 @@ function App() {
     return (
       <div className="h-full w-full bg-[#0a0a0a] text-white p-6 overflow-y-auto no-scrollbar flex flex-col">
         <header className="mb-8 pt-4">
-          <h1 className="text-4xl font-extrabold tracking-tighter uppercase italic text-[#f59e0b]">TrimMaster <span className="text-xs italic font-normal text-zinc-600">v1.2.1</span></h1>
-          <p className="text-zinc-500 font-medium">Select your target</p>
+          <div className="flex items-center gap-2">
+            <h1 className="text-4xl font-extrabold tracking-tighter uppercase italic text-[#f59e0b]">TrimMaster</h1>
+            <span className="bg-amber-500/10 text-amber-500 text-[10px] px-2 py-0.5 rounded border border-amber-500/20 font-mono">v1.2.2</span>
+          </div>
+          <p className="text-zinc-500 font-medium">Select your target style</p>
         </header>
         
         <div className="grid grid-cols-2 gap-4 pb-12">
@@ -64,7 +67,7 @@ function App() {
             onClick={() => setIsMirrored(!isMirrored)}
             className={`p-4 rounded-2xl border flex flex-col items-center gap-1 transition-all active:scale-90 ${
               isMirrored 
-              ? 'bg-amber-500 text-black border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.3)]' 
+              ? 'bg-amber-500 text-black border-amber-500' 
               : 'bg-zinc-900/80 text-white border-white/20'
             }`}
           >
@@ -93,7 +96,7 @@ function App() {
       <div className="absolute bottom-0 left-0 right-0 z-50 p-8 pb-12 bg-gradient-to-t from-black/90 to-transparent pointer-events-none">
         <div className="flex flex-col gap-3 pointer-events-auto max-w-sm mx-auto">
           <div className="flex justify-between px-4">
-             <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Guide Strength</span>
+             <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Strength</span>
              <span className="text-[10px] font-bold text-amber-500">{Math.round(opacity * 100)}%</span>
           </div>
           <div className="flex items-center gap-4 bg-zinc-900/80 backdrop-blur-2xl p-5 rounded-[2rem] border border-white/10 shadow-2xl">
