@@ -26,7 +26,7 @@ function App() {
     return (
       <div className="h-full w-full bg-[#0a0a0a] text-white p-6 overflow-y-auto no-scrollbar flex flex-col">
         <header className="mb-8 pt-4">
-          <h1 className="text-4xl font-extrabold tracking-tighter uppercase italic text-[#f59e0b]">TrimMaster</h1>
+          <h1 className="text-4xl font-extrabold tracking-tighter uppercase italic text-[#f59e0b]">TrimMaster <span className="text-xs italic font-normal text-zinc-600">v1.2</span></h1>
           <p className="text-zinc-500 font-medium">Select your target</p>
         </header>
         
@@ -51,36 +51,34 @@ function App() {
 
   return (
     <div className="h-full w-full bg-black text-white relative">
-      {/* Top Bar - Controls */}
-      <div className="absolute top-0 left-0 right-0 z-40 p-6 pt-12 flex flex-col gap-6 bg-gradient-to-b from-black/90 to-transparent pointer-events-none">
-        <div className="flex justify-between items-start pointer-events-auto">
-          <div className="flex flex-col gap-1">
-             <span className="text-xs font-bold text-amber-500 uppercase tracking-widest">Target Style</span>
-             <h2 className="text-2xl font-black uppercase italic tracking-tighter leading-none">{selectedStyle?.name}</h2>
-          </div>
-          
-          <div className="flex gap-3">
-            {/* Mirror Toggle Button */}
-            <button 
-              onClick={() => setIsMirrored(!isMirrored)}
-              className={`p-3 backdrop-blur-xl rounded-full border transition-all flex flex-col items-center gap-1 ${
-                isMirrored 
-                ? 'bg-amber-500/20 border-amber-500 text-amber-500' 
-                : 'bg-white/10 border-white/10 text-white'
-              }`}
-              title={isMirrored ? "Mirror View" : "True View"}
-            >
-              <FlipHorizontal size={20} />
-              <span className="text-[8px] font-black uppercase">{isMirrored ? 'Mirror' : 'True'}</span>
-            </button>
+      
+      {/* --- TOP HUD --- */}
+      <div className="absolute top-0 left-0 right-0 z-50 p-6 pt-12 flex justify-between items-start pointer-events-none">
+        <div className="flex flex-col gap-1 pointer-events-auto">
+           <span className="text-xs font-bold text-amber-500 uppercase tracking-widest">Target</span>
+           <h2 className="text-2xl font-black uppercase italic tracking-tighter leading-none">{selectedStyle?.name}</h2>
+        </div>
+        
+        <div className="flex gap-3 pointer-events-auto">
+          {/* MIRROR TOGGLE */}
+          <button 
+            onClick={() => setIsMirrored(!isMirrored)}
+            className={`p-4 rounded-2xl border flex flex-col items-center gap-1 transition-all ${
+              isMirrored 
+              ? 'bg-amber-500 text-black border-amber-500' 
+              : 'bg-zinc-900/80 text-white border-white/20'
+            }`}
+          >
+            <FlipHorizontal size={24} />
+            <span className="text-[10px] font-black uppercase">{isMirrored ? 'Mirror' : 'True'}</span>
+          </button>
 
-            <button 
-              onClick={startOver}
-              className="p-3 bg-white/10 backdrop-blur-xl rounded-full border border-white/10 active:scale-90 transition-transform h-fit"
-            >
-              <ChevronLeft size={20} />
-            </button>
-          </div>
+          <button 
+            onClick={startOver}
+            className="p-4 bg-zinc-900/80 rounded-2xl border border-white/20 active:scale-90"
+          >
+            <ChevronLeft size={24} />
+          </button>
         </div>
       </div>
 
@@ -92,23 +90,23 @@ function App() {
         mirrored={isMirrored}
       />
 
-      {/* Bottom Opacity Slider */}
-      <div className="absolute bottom-0 left-0 right-0 z-40 p-8 pb-12 bg-gradient-to-t from-black/90 to-transparent">
-        <div className="flex flex-col gap-2">
-          <div className="flex justify-between px-2">
+      {/* --- BOTTOM HUD --- */}
+      <div className="absolute bottom-0 left-0 right-0 z-50 p-8 pb-12 bg-gradient-to-t from-black/90 to-transparent">
+        <div className="flex flex-col gap-3">
+          <div className="flex justify-between px-4">
              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Guide Visibility</span>
              <span className="text-[10px] font-bold text-amber-500">{Math.round(opacity * 100)}%</span>
           </div>
-          <div className="flex items-center gap-4 bg-zinc-900/80 backdrop-blur-2xl p-4 rounded-[2rem] border border-white/10 shadow-2xl">
-            <Layers size={18} className="text-zinc-500" />
+          <div className="flex items-center gap-4 bg-zinc-900/80 backdrop-blur-2xl p-5 rounded-[2rem] border border-white/10 shadow-2xl">
+            <Layers size={20} className="text-zinc-500" />
             <input 
               type="range" 
               min="0" 
               max="1" 
-              step="0.05" 
+              step="0.01" 
               value={opacity} 
               onChange={(e) => setOpacity(parseFloat(e.target.value))}
-              className="flex-1 accent-amber-500 h-1.5 bg-zinc-800 rounded-full appearance-none"
+              className="flex-1 accent-amber-500 h-2 bg-zinc-800 rounded-full appearance-none"
             />
           </div>
         </div>
