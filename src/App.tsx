@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { CameraView } from './components/CameraView';
 import { BEARD_STYLES } from './constants';
-import { BeardStyle } from './types';
+import type { BeardStyle } from './types';
 import { Layers, ChevronLeft, FlipHorizontal } from 'lucide-react';
 
 type AppStep = 'gallery' | 'studio';
