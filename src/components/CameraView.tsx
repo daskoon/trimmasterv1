@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { setupFaceMesh } from '../services/faceMesh';
 import { drawBeardOverlay } from '../services/beardRenderer';
 import type { Results } from '@mediapipe/face_mesh';
