@@ -15,9 +15,9 @@ function App() {
 
   const styles = isEasterEggActive 
     ? [...BEARD_STYLES, { 
-        id: 'buccaneer', 
-        name: 'The Buccaneer', 
-        image: 'https://images.unsplash.com/photo-1590004953392-5aba2e78594b?auto=format&fit=crop&q=80&w=400',
+        id: 'logan', 
+        name: 'The Logan', 
+        image: '/logan.jpg',
         referenceImages: {} 
       }]
     : BEARD_STYLES;
@@ -43,7 +43,7 @@ function App() {
                 className="cursor-pointer active:text-amber-300 transition-colors"
                 onClick={() => {
                   setIsEasterEggActive(true);
-                  alert("🏴‍☠️ Secret Style Unlocked: The Buccaneer!");
+                  alert("🤘 Secret Style Unlocked: The Logan!");
                 }}
               >
                 r
