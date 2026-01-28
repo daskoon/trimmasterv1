@@ -14,7 +14,6 @@ function App() {
   const [isEasterEggActive, setIsEasterEggActive] = useState(false);
 
   useEffect(() => {
-    // Fake "System Boot" delay for polish
     const timer = setTimeout(() => {
       setStep('gallery');
     }, 2000);
@@ -40,7 +39,6 @@ function App() {
     setSelectedStyle(null);
   };
 
-  // --- SPLASH SCREEN ---
   if (step === 'splash') {
     return (
       <div className="h-full w-full bg-black flex flex-col items-center justify-center text-white animate-fade-in">
@@ -49,7 +47,7 @@ function App() {
           <Scissors size={64} className="text-amber-500 relative z-10" />
         </div>
         <h1 className="text-4xl font-black italic tracking-tighter mb-2">TRIMMASTER</h1>
-        <p className="text-zinc-500 font-mono text-xs tracking-widest">SYSTEM v1.2.4</p>
+        <p className="text-zinc-500 font-mono text-xs tracking-widest">SYSTEM v1.2.5</p>
         <div className="mt-8 w-32 h-1 bg-zinc-900 rounded-full overflow-hidden">
           <div className="h-full bg-amber-500 animate-[loading_1.5s_ease-in-out_forwards] w-full origin-left"></div>
         </div>
@@ -57,11 +55,11 @@ function App() {
     );
   }
 
-  // --- GALLERY ---
+  // --- GALLERY (CAROUSEL MODE) ---
   if (step === 'gallery') {
     return (
-      <div className="h-full w-full bg-[#0a0a0a] text-white p-6 overflow-y-auto no-scrollbar flex flex-col animate-fade-in">
-        <header className="mb-8 pt-4">
+      <div className="h-full w-full bg-[#0a0a0a] text-white flex flex-col animate-fade-in relative overflow-hidden">
+        <header className="px-8 pt-12 pb-4 z-10 bg-gradient-to-b from-black to-transparent">
           <div className="flex items-center gap-2">
             <h1 className="text-4xl font-extrabold tracking-tighter uppercase italic text-[#f59e0b]">
               TrimMaste
@@ -75,35 +73,44 @@ function App() {
                 r
               </span>
             </h1>
-            <span className="bg-amber-500/10 text-amber-500 text-[10px] px-2 py-0.5 rounded border border-amber-500/20 font-mono">v1.2.4</span>
+            <span className="bg-amber-500/10 text-amber-500 text-[10px] px-2 py-0.5 rounded border border-amber-500/20 font-mono">v1.2.5</span>
           </div>
-          <p className="text-zinc-500 font-medium">Select your target style</p>
+          <p className="text-zinc-500 font-medium text-sm mt-1">Swipe to select your target</p>
         </header>
         
-        <div className="grid grid-cols-2 gap-4 pb-12">
+        {/* CAROUSEL CONTAINER */}
+        <div className="flex-1 flex items-center overflow-x-auto snap-x snap-mandatory px-8 pb-12 gap-4 no-scrollbar">
           {styles.map(style => (
             <button
               key={style.id}
               onClick={() => handleSelectStyle(style)}
-              className={`relative w-full aspect-[3/4] rounded-[2rem] overflow-hidden bg-zinc-900 border active:scale-95 transition-all text-left group ${
-                style.id === 'logan' ? 'border-amber-500 animate-pulse' : 'border-white/5'
+              className={`relative flex-shrink-0 w-64 h-[70vh] rounded-[2.5rem] overflow-hidden bg-zinc-900 border snap-center transition-all duration-300 active:scale-95 group ${
+                style.id === 'logan' ? 'border-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.2)]' : 'border-white/5'
               }`}
             >
               <img 
                 src={style.image} 
                 alt={style.name} 
-                className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" 
+                className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500 grayscale group-hover:grayscale-0" 
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-5">
-                <span className={`text-xs font-bold uppercase tracking-widest mb-1 ${
-                  style.id === 'logan' ? 'text-amber-400' : 'text-zinc-500'
+              
+              {/* Card Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent flex flex-col justify-end p-8 text-left">
+                <div className="w-12 h-1 bg-amber-500 mb-4 rounded-full"></div>
+                <span className={`text-[10px] font-bold uppercase tracking-[0.2em] mb-2 ${
+                  style.id === 'logan' ? 'text-amber-400' : 'text-zinc-400'
                 }`}>
-                  {style.id === 'logan' ? 'Hidden Style' : 'Style'}
+                  {style.id === 'logan' ? 'Legendary' : 'Class A'}
                 </span>
-                <h2 className="text-lg font-bold uppercase leading-none drop-shadow-md">{style.name}</h2>
+                <h2 className="text-3xl font-black uppercase italic tracking-tighter leading-none mb-2">{style.name}</h2>
+                <p className="text-xs text-zinc-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">
+                  Tap to Activate AR Guide
+                </p>
               </div>
             </button>
           ))}
+          {/* Spacer for end of list */}
+          <div className="w-4 flex-shrink-0"></div>
         </div>
       </div>
     );
