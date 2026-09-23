@@ -9,7 +9,7 @@ type AppStep = 'splash' | 'gallery' | 'studio';
 function App() {
   const [step, setStep] = useState<AppStep>('splash');
   const [selectedStyle, setSelectedStyle] = useState<BeardStyle | null>(null);
-  const [opacity, setOpacity] = useState(0.8);
+  const [zoom, setZoom] = useState(1.0);
   const [isMirrored, setIsMirrored] = useState(true);
   const [isEasterEggActive, setIsEasterEggActive] = useState(false);
 
@@ -147,23 +147,23 @@ function App() {
         </div>
       </div>
 
-      <CameraView mode="guide" styleName={selectedStyle?.name} opacity={opacity} mirrored={isMirrored} />
+      <CameraView mode="guide" styleName={selectedStyle?.name} zoom={zoom} mirrored={isMirrored} />
 
       <div className="absolute bottom-0 left-0 right-0 z-50 p-8 pb-12 bg-gradient-to-t from-black/90 to-transparent pointer-events-none">
         <div className="flex flex-col gap-3 pointer-events-auto max-w-sm mx-auto">
           <div className="flex justify-between px-4">
-             <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Strength</span>
-             <span className="text-[10px] font-bold text-amber-500">{Math.round(opacity * 100)}%</span>
+             <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Zoom</span>
+             <span className="text-[10px] font-bold text-amber-500">{zoom.toFixed(1)}x</span>
           </div>
           <div className="flex items-center gap-4 bg-zinc-900/80 backdrop-blur-2xl p-5 rounded-[2rem] border border-white/10 shadow-2xl">
             <Layers size={20} className="text-zinc-500" />
-            <input 
-              type="range" 
-              min="0" 
-              max="1" 
-              step="0.01" 
-              value={opacity} 
-              onChange={(e) => setOpacity(parseFloat(e.target.value))}
+            <input
+              type="range"
+              min="0.5"
+              max="3"
+              step="0.05"
+              value={zoom}
+              onChange={(e) => setZoom(parseFloat(e.target.value))}
               className="flex-1 accent-amber-500 h-2 bg-zinc-800 rounded-full appearance-none"
             />
           </div>

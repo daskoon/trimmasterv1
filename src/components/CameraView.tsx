@@ -6,22 +6,65 @@ import type { Results } from '@mediapipe/face_mesh';
 
 interface CameraViewProps {
   mode: 'capture' | 'guide';
-  overlayImage?: string; 
-  styleName?: string;    
-  opacity?: number;
+  overlayImage?: string;
+  styleName?: string;
+  zoom?: number;
   mirrored?: boolean;
   onCapture?: (image: string) => void;
 }
 
-export const CameraView: React.FC<CameraViewProps> = ({ 
+export const CameraView: React.FC<CameraViewProps> = ({
   styleName = 'The Commander',
-  opacity = 0.8,
+  zoom = 1.0,
   mirrored = true
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Refs so the per-frame callback always sees the latest values
+  const zoomRef = useRef(zoom);
+  const panOffsetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  useEffect(() => { zoomRef.current = zoom; }, [zoom]);
+
+  const [panOffset, setPanOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  useEffect(() => { panOffsetRef.current = panOffset; }, [panOffset]);
+
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [panStart, setPanStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+    setDragStart({ x: e.clientX, y: e.clientY });
+    setPanStart({ ...panOffset });
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging) return;
+    const dx = e.clientX - dragStart.x;
+    const dy = e.clientY - dragStart.y;
+    // Invert X when mirrored so dragging feels natural in mirror mode
+    const sign = mirrored ? -1 : 1;
+    setPanOffset({
+      x: panStart.x + dx * sign,
+      y: panStart.y + dy,
+    });
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    setIsDragging(false);
+    try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch {}
+  };
+
+  const handlePointerCancel = (e: React.PointerEvent) => {
+    setIsDragging(false);
+    try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch {}
+  };
 
   useEffect(() => {
     let cameraController: { start: () => Promise<void>; stop: () => void } | null = null;
@@ -32,6 +75,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
       try {
         setIsLoading(true);
         setError(null);
+        setPanOffset({ x: 0, y: 0 });
 
         const isPortrait = window.innerHeight > window.innerWidth;
         const idealWidth = isPortrait ? 720 : 1280;
@@ -41,7 +85,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
         canvasRef.current.height = idealHeight;
 
         const { start, stop } = setupFaceMesh(
-          videoRef.current, 
+          videoRef.current,
           (results: Results) => {
             if (!canvasRef.current) return;
             const ctx = canvasRef.current.getContext('2d');
@@ -51,11 +95,21 @@ export const CameraView: React.FC<CameraViewProps> = ({
 
             const width = canvasRef.current.width;
             const height = canvasRef.current.height;
+            const cx = width / 2;
+            const cy = height / 2;
 
             ctx.save();
             ctx.clearRect(0, 0, width, height);
+
+            // Apply zoom (centered) and pan offset
+            const currentZoom = zoomRef.current;
+            const currentPan = panOffsetRef.current;
+
+            ctx.translate(cx + currentPan.x, cy + currentPan.y);
+            ctx.scale(currentZoom, currentZoom);
+            ctx.translate(-cx, -cy);
+
             ctx.drawImage(results.image, 0, 0, width, height);
-            ctx.globalAlpha = opacity;
             drawBeardOverlay(ctx, results, styleName || 'commander');
             ctx.restore();
           },
@@ -78,27 +132,31 @@ export const CameraView: React.FC<CameraViewProps> = ({
     return () => {
       if (cameraController) cameraController.stop();
     };
-  }, [styleName, opacity]); 
+  }, [styleName]);
 
   return (
     <div className="absolute inset-0 w-full h-full bg-black overflow-hidden flex items-center justify-center">
       <video ref={videoRef} className="hidden" playsInline muted />
 
-      {/* 
+      {/*
           FINAL SQUISH FIX:
-          We use scale(-1, 1) and lock the width/height to 100vw/100vh 
+          We use scale(-1, 1) and lock the width/height to 100vw/100vh
           to ensure it never collapses into a vertical line.
       */}
-      <div 
-        style={{ 
-          width: '100vw', 
+      <div
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
+        style={{
+          width: '100vw',
           height: '100vh',
           transform: mirrored ? 'scale(-1, 1)' : 'scale(1, 1)',
           transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
         }}
-        className="absolute inset-0 flex items-center justify-center"
+        className="absolute inset-0 flex items-center justify-center cursor-grab active:cursor-grabbing touch-none"
       >
-        <canvas 
+        <canvas
           ref={canvasRef}
           className="w-full h-full object-cover"
         />
