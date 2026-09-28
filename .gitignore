@@ -22,3 +22,16 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+*.mbox
+*.zip
+*.apk
+*.mp4
+*.blend
+*.msi
+*.vdi
+*.iso
+*.so
+*.dll
+*.bin
+*.dill
